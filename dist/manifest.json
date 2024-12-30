@@ -1,12 +1,21 @@
 {
-    "manifest_version": 1,
-    "name": "Wiener Linien Anzeige",
-    "short_name": "Wiener Linien Anzeige",
-    "description": "Siehe README.md",
-    "author": "sklera GmbH",
-    "version": "1.0.0",
-    "offline_enabled": true,
-    "thumbnail": "thumbnail.png",
-    "snapshot": "thumbnail.png",
-    "config": []
+	"name": "Wiener Linien Anzeige",
+	"description": "Real-time departure display for Wiener Linien tram line O",
+	"version": "1.0.0",
+	"config": {
+		"settings": [
+			{
+				"key": "refreshInterval",
+				"type": "number",
+				"default": 60,
+				"description": "Time interval (in seconds) for data refresh"
+			},
+			{
+				"key": "lineName",
+				"type": "string",
+				"default": "O",
+				"description": "Name of the tram line to display"
+			}
+		]
+	}
 }
