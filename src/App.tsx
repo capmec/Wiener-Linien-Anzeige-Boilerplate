@@ -1,7 +1,7 @@
-// src/App.tsx
 import React, { useEffect, useState } from 'react';
 import { fetchStopData } from './services/wienerLinienService';
 import DepartureDisplay from './components/DepartureDisplay';
+import { SkleraService } from './services/skleraService'; // Your SkleraService
 
 type Departure = {
 	departureTime: {
@@ -22,6 +22,25 @@ const App: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
+		// Initialize Sklera SDK
+		const initializeSklera = async () => {
+			try {
+				const { screenData, configData } = await SkleraService.initialize();
+				console.log('Screen Data:', screenData);
+				console.log('Config Data:', configData);
+
+				// You can also interact with Sklera SDK here
+				// Example: log an event when the app initializes
+				SkleraService.logEvent('App Initialized', {
+					screenData,
+					configData,
+				});
+			} catch (err) {
+				console.error('Error initializing Sklera SDK:', err);
+			}
+		};
+
+		// Fetch tram data
 		const fetchData = async () => {
 			try {
 				const [stop3448Data, stop3445Data] = await Promise.all([
@@ -36,6 +55,8 @@ const App: React.FC = () => {
 			}
 		};
 
+		// Call the functions
+		initializeSklera();
 		fetchData();
 	}, []);
 
@@ -47,16 +68,16 @@ const App: React.FC = () => {
 		<div className='flex justify-between space-x-8 p-6'>
 			<div className='w-1/2'>
 				<DepartureDisplay
-					departures={stop3448Departures}
-					title='Abfahrt'
+					departures={stop3445Departures}
+					title='Krakauer Straße Abfahrt'
 					platform={`Platform: ${stop3445Departures[0]?.vehicle.platform || 'Unknown'}`}
 					towards={stop3445Departures[0]?.vehicle.towards || 'Unknown'}
 				/>
 			</div>
 			<div className='w-1/2'>
 				<DepartureDisplay
-					departures={stop3445Departures}
-					title='Abfahrt'
+					departures={stop3448Departures}
+					title='Krakauer Straße Abfahrt'
 					platform={`Platform: ${stop3448Departures[0]?.vehicle.platform || 'Unknown'}`}
 					towards={stop3448Departures[0]?.vehicle.towards || 'Unknown'}
 				/>
