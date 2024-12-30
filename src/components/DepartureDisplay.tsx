@@ -1,3 +1,4 @@
+// src/DepartureDisplay.tsx
 import React from 'react';
 
 type Departure = {
@@ -13,48 +14,46 @@ type Departure = {
 	};
 };
 
-type DepartureDisplayProps = {
+interface DepartureDisplayProps {
 	departures: Departure[];
-};
+	title: string;
+	platform: string;
+	towards: string;
+}
 
-const DepartureDisplay: React.FC<DepartureDisplayProps> = ({ departures }) => {
-	// Group departures by platform
-	const platforms = departures.reduce(
-		(acc: { [key: string]: Departure[] }, dep) => {
-			const platform = dep.vehicle.platform; // Ensure we are correctly using the platform field
-			if (!acc[platform]) acc[platform] = [];
-			acc[platform].push(dep);
-			return acc;
-		},
-		{},
-	);
+const DepartureDisplay: React.FC<DepartureDisplayProps> = ({
+	departures,
+	title,
+	platform,
+	towards,
+}) => {
+	if (!departures.length) {
+		return (
+			<div className='text-red-600 text-center'>
+				No departures available for {title}.
+			</div>
+		);
+	}
 
 	return (
-		<div className='space-y-4'>
-			{Object.entries(platforms).map(([platform, departures]) => (
+		<div className='bg-blue-50 p-6 rounded-lg shadow-lg space-y-6'>
+			<h2 className='text-3xl font-bold text-center text-gray-800'>{title}</h2>
+			<div className='text-lg font-semibold text-center text-gray-700'>
+				Towards: {towards}
+			</div>
+			{departures.map((departure, idx) => (
 				<div
-					key={platform}
-					className='bg-blue-50 p-4 rounded shadow-md'>
-					<h1 className='text-2xl font-bold text-center'>Abfahrtszeiten</h1>
-					<div className='text-center text-lg font-semibold'>
+					key={idx}
+					className='p-4 border-b border-gray-300'>
+					<div className='font-semibold text-gray-900'>
 						Platform: {platform}
 					</div>
-					<div className='mt-4'>
-						{departures.map((dep, idx) => (
-							<div
-								key={idx}
-								className='mb-2'>
-								<div className='font-semibold'>
-									Train towards: {dep.vehicle.towards}
-								</div>
-								<div className='text-gray-600'>
-									Train name: {dep.vehicle.name}
-								</div>
-								<div className='text-red-600'>
-									In: {dep.departureTime.countdown} minutes
-								</div>
-							</div>
-						))}
+					<div className='text-gray-600'>
+						Countdown: {departure.departureTime.countdown} minutes
+					</div>
+					<div className='text-red-600'>
+						Planned:{' '}
+						{new Date(departure.departureTime.timePlanned).toLocaleTimeString()}
 					</div>
 				</div>
 			))}

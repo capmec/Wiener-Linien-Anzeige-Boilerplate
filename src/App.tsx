@@ -1,118 +1,62 @@
-import React, { useEffect, useReducer } from 'react';
+// src/App.tsx
+import React, { useEffect, useState } from 'react';
 import { fetchStopData } from './services/wienerLinienService';
 import DepartureDisplay from './components/DepartureDisplay';
 
-type State = {
-	departuresBrunoMarekAllee: any[];
-	departuresRaxstrasse: any[];
-	error: string | null;
-	loading: boolean;
+type Departure = {
+	departureTime: {
+		timePlanned: string;
+		timeReal: string;
+		countdown: number;
+	};
+	vehicle: {
+		name: string;
+		towards: string;
+		platform: string;
+	};
 };
 
-type Action =
-	| { type: 'FETCH_START' }
-	| {
-			type: 'FETCH_SUCCESS';
-			departuresBrunoMarekAllee: any[];
-			departuresRaxstrasse: any[];
-	  }
-	| { type: 'FETCH_ERROR'; error: string };
-
-const initialState: State = {
-	departuresBrunoMarekAllee: [],
-	departuresRaxstrasse: [],
-	error: null,
-	loading: true,
-};
-
-const reducer = (state: State, action: Action): State => {
-	switch (action.type) {
-		case 'FETCH_START':
-			return { ...state, loading: true, error: null };
-		case 'FETCH_SUCCESS':
-			return {
-				...state,
-				departuresBrunoMarekAllee: action.departuresBrunoMarekAllee,
-				departuresRaxstrasse: action.departuresRaxstrasse,
-				loading: false,
-			};
-		case 'FETCH_ERROR':
-			return { ...state, error: action.error, loading: false };
-		default:
-			return state;
-	}
-};
-
-const App = () => {
-	const [state, dispatch] = useReducer(reducer, initialState);
+const App: React.FC = () => {
+	const [stop3448Departures, setStop3448Departures] = useState<Departure[]>([]);
+	const [stop3445Departures, setStop3445Departures] = useState<Departure[]>([]);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		const getData = async () => {
-			dispatch({ type: 'FETCH_START' });
-
+		const fetchData = async () => {
 			try {
-				const stopIdBrunoMarekAllee = '3445'; // Replace with actual stop ID
-				const stopIdRaxstrasse = '1234'; // Replace with actual stop ID
-				const departuresBrunoMarekAllee = await fetchStopData(
-					stopIdBrunoMarekAllee,
-				);
-				const departuresRaxstrasse = await fetchStopData(stopIdRaxstrasse);
-
-				dispatch({
-					type: 'FETCH_SUCCESS',
-					departuresBrunoMarekAllee,
-					departuresRaxstrasse,
-				});
-			} catch (error) {
-				dispatch({ type: 'FETCH_ERROR', error: 'Error fetching data' });
+				const [stop3448Data, stop3445Data] = await Promise.all([
+					fetchStopData('3448'),
+					fetchStopData('3445'),
+				]);
+				setStop3448Departures(stop3448Data);
+				setStop3445Departures(stop3445Data);
+			} catch (err) {
+				console.error(err);
+				setError('Failed to fetch departure data.');
 			}
 		};
 
-		getData();
+		fetchData();
 	}, []);
 
-	if (state.loading) {
-		return <div className='text-center text-xl font-semibold'>Loading...</div>;
+	if (error) {
+		return <div className='text-red-500 text-center'>{error}</div>;
 	}
-
-	if (state.error) {
-		return (
-			<div className='text-center text-xl text-red-500'>
-				Error: {state.error}
-			</div>
-		);
-	}
-
-	const nextDeparturesBrunoMarekAllee = state.departuresBrunoMarekAllee.slice(
-		0,
-		3,
-	);
-	const nextDeparturesRaxstrasse = state.departuresRaxstrasse.slice(0, 3);
 
 	return (
-		<div className='container mx-auto p-4'>
-			<div className='flex justify-between space-x-4'>
-				{/* Display for Bruno-Marek-Allee */}
-				<div className='w-full bg-gray-100 p-4 rounded-lg shadow-md'>
-					{nextDeparturesBrunoMarekAllee.length > 0 ? (
-						<DepartureDisplay departures={nextDeparturesBrunoMarekAllee} />
-					) : (
-						<div className='text-center text-gray-500'>
-							No departures available
-						</div>
-					)}
-				</div>
-
-				<div className='w-full bg-gray-100 p-4 rounded-lg shadow-md'>
-					{nextDeparturesRaxstrasse.length > 0 ? (
-						<DepartureDisplay departures={nextDeparturesRaxstrasse} />
-					) : (
-						<div className='text-center text-gray-500'>
-							No departures available
-						</div>
-					)}
-				</div>
-			</div>
+		<div className='space-y-8'>
+			<DepartureDisplay
+				departures={stop3448Departures}
+				title='Departures towards Raxstraße, Rudolfshügelgasse'
+				platform='Platform 1'
+				towards='Raxstraße, Rudolfshügelgasse'
+			/>
+			<DepartureDisplay
+				departures={stop3445Departures}
+				title='Departures towards Bruno-Marek-Allee'
+				platform='Platform 2'
+				towards='Bruno-Marek-Allee'
+			/>
 		</div>
 	);
 };
