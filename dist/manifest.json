@@ -1,0 +1,12 @@
+{
+    "manifest_version": 1,
+    "name": "Wiener Linien Anzeige",
+    "short_name": "Wiener Linien Anzeige",
+    "description": "Siehe README.md",
+    "author": "sklera GmbH",
+    "version": "1.0.0",
+    "offline_enabled": true,
+    "thumbnail": "thumbnail.png",
+    "snapshot": "thumbnail.png",
+    "config": []
+}

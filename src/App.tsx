@@ -58,6 +58,11 @@ const App: React.FC = () => {
 		// Call the functions
 		initializeSklera();
 		fetchData();
+
+		const interval = setInterval(() => {
+			fetchData();
+		}, 60000);
+		return () => clearInterval(interval);
 	}, []);
 
 	if (error) {
@@ -69,7 +74,7 @@ const App: React.FC = () => {
 			<div className='w-1/2'>
 				<DepartureDisplay
 					departures={stop3445Departures}
-					title='Krakauer Straße Abfahrt'
+					title='Krakauer Straße Abfahrtszeiten'
 					platform={`Platform: ${stop3445Departures[0]?.vehicle.platform || 'Unknown'}`}
 					towards={stop3445Departures[0]?.vehicle.towards || 'Unknown'}
 				/>
@@ -77,7 +82,7 @@ const App: React.FC = () => {
 			<div className='w-1/2'>
 				<DepartureDisplay
 					departures={stop3448Departures}
-					title='Krakauer Straße Abfahrt'
+					title='Krakauer Straße Abfahrtszeiten'
 					platform={`Platform: ${stop3448Departures[0]?.vehicle.platform || 'Unknown'}`}
 					towards={stop3448Departures[0]?.vehicle.towards || 'Unknown'}
 				/>
