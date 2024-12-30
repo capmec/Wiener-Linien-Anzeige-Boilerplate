@@ -1,56 +1,120 @@
-import React, { useEffect, useState } from 'react';
-import { skleraSDK } from '@sklera/sdk';
+import React, { useEffect, useReducer } from 'react';
 import { fetchStopData } from './services/wienerLinienService';
 import DepartureDisplay from './components/DepartureDisplay';
 
-const App: React.FC = () => {
-	const [departures, setDepartures] = useState<any[]>([]);
-	const [error, setError] = useState<string | null>(null);
+type State = {
+	departuresBrunoMarekAllee: any[];
+	departuresRaxstrasse: any[];
+	error: string | null;
+	loading: boolean;
+};
+
+type Action =
+	| { type: 'FETCH_START' }
+	| {
+			type: 'FETCH_SUCCESS';
+			departuresBrunoMarekAllee: any[];
+			departuresRaxstrasse: any[];
+	  }
+	| { type: 'FETCH_ERROR'; error: string };
+
+const initialState: State = {
+	departuresBrunoMarekAllee: [],
+	departuresRaxstrasse: [],
+	error: null,
+	loading: true,
+};
+
+const reducer = (state: State, action: Action): State => {
+	switch (action.type) {
+		case 'FETCH_START':
+			return { ...state, loading: true, error: null };
+		case 'FETCH_SUCCESS':
+			return {
+				...state,
+				departuresBrunoMarekAllee: action.departuresBrunoMarekAllee,
+				departuresRaxstrasse: action.departuresRaxstrasse,
+				loading: false,
+			};
+		case 'FETCH_ERROR':
+			return { ...state, error: action.error, loading: false };
+		default:
+			return state;
+	}
+};
+
+const App = () => {
+	const [state, dispatch] = useReducer(reducer, initialState);
 
 	useEffect(() => {
-		// Initialize Sklera SDK
-		const initializeSklera = async () => {
-			try {
-				const { screenData, configData } = await skleraSDK.loaded();
-				console.log('Screen Data:', screenData);
-				console.log('Config Data:', configData);
-			} catch (error) {
-				console.error('Failed to initialize Sklera SDK:', error);
-			}
-		};
-		initializeSklera();
+		const getData = async () => {
+			dispatch({ type: 'FETCH_START' });
 
-		// Fetch departure data
-		const fetchDepartureData = async () => {
 			try {
-				const stopIds = ['3445', '3448'];
-				const results = await Promise.all(stopIds.map(fetchStopData));
-				const departures = results.flatMap((stop: any) =>
-					stop.data.monitors.map((monitor: any) => ({
-						line: monitor.lines[0].name,
-						destination: monitor.lines[0].towards,
-						countdown:
-							monitor.lines[0].departures.departure[0].departureTime.countdown,
-					})),
+				const stopIdBrunoMarekAllee = '3445'; // Replace with actual stop ID
+				const stopIdRaxstrasse = '1234'; // Replace with actual stop ID
+				const departuresBrunoMarekAllee = await fetchStopData(
+					stopIdBrunoMarekAllee,
 				);
-				setDepartures(departures);
-			} catch (err) {
-				setError('Failed to load departure data.');
-				console.error(err);
+				const departuresRaxstrasse = await fetchStopData(stopIdRaxstrasse);
+
+				dispatch({
+					type: 'FETCH_SUCCESS',
+					departuresBrunoMarekAllee,
+					departuresRaxstrasse,
+				});
+			} catch (error) {
+				dispatch({ type: 'FETCH_ERROR', error: 'Error fetching data' });
 			}
 		};
 
-		fetchDepartureData();
-		const timer = setInterval(fetchDepartureData, 60000); // Fetch every minute
-
-		return () => clearInterval(timer); // Cleanup on unmount
+		getData();
 	}, []);
 
-	if (error) {
-		return <div>{error}</div>;
+	if (state.loading) {
+		return <div className='text-center text-xl font-semibold'>Loading...</div>;
 	}
 
-	return <DepartureDisplay departures={departures} />;
+	if (state.error) {
+		return (
+			<div className='text-center text-xl text-red-500'>
+				Error: {state.error}
+			</div>
+		);
+	}
+
+	const nextDeparturesBrunoMarekAllee = state.departuresBrunoMarekAllee.slice(
+		0,
+		3,
+	);
+	const nextDeparturesRaxstrasse = state.departuresRaxstrasse.slice(0, 3);
+
+	return (
+		<div className='container mx-auto p-4'>
+			<div className='flex justify-between space-x-4'>
+				{/* Display for Bruno-Marek-Allee */}
+				<div className='w-full bg-gray-100 p-4 rounded-lg shadow-md'>
+					{nextDeparturesBrunoMarekAllee.length > 0 ? (
+						<DepartureDisplay departures={nextDeparturesBrunoMarekAllee} />
+					) : (
+						<div className='text-center text-gray-500'>
+							No departures available
+						</div>
+					)}
+				</div>
+
+				<div className='w-full bg-gray-100 p-4 rounded-lg shadow-md'>
+					{nextDeparturesRaxstrasse.length > 0 ? (
+						<DepartureDisplay departures={nextDeparturesRaxstrasse} />
+					) : (
+						<div className='text-center text-gray-500'>
+							No departures available
+						</div>
+					)}
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default App;
