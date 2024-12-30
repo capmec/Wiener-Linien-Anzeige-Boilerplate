@@ -6,7 +6,7 @@ import tailwindcss from 'tailwindcss';
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [react()],
-	base: '/Wiener-Linien-Anzeige-Boilerplate',
+	base: '/wiener-linien-anzeige-boilerplate/',
 	css: {
 		postcss: {
 			plugins: [tailwindcss()],
