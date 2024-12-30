@@ -39,21 +39,22 @@ const DepartureDisplay: React.FC<DepartureDisplayProps> = ({
 		<div className='bg-blue-50 p-6 rounded-lg shadow-lg space-y-6'>
 			<h2 className='text-3xl font-bold text-center text-gray-800'>{title}</h2>
 			<div className='text-lg font-semibold text-center text-gray-700'>
-				Towards: {towards}
+				{platform}
 			</div>
 			{departures.map((departure, idx) => (
 				<div
 					key={idx}
 					className='p-4 border-b border-gray-300'>
-					<div className='font-semibold text-gray-900'>
-						Platform: {platform}
-					</div>
+					<div className='font-semibold text-gray-900'>{towards}</div>
 					<div className='text-gray-600'>
-						Countdown: {departure.departureTime.countdown} minutes
+						Planned:{' '}
+						{new Date(departure.departureTime.timePlanned).toLocaleTimeString(
+							[],
+							{ hour: '2-digit', minute: '2-digit' },
+						)}
 					</div>
 					<div className='text-red-600'>
-						Planned:{' '}
-						{new Date(departure.departureTime.timePlanned).toLocaleTimeString()}
+						In: {departure.departureTime.countdown} minutes
 					</div>
 				</div>
 			))}

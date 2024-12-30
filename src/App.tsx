@@ -44,19 +44,23 @@ const App: React.FC = () => {
 	}
 
 	return (
-		<div className='space-y-8'>
-			<DepartureDisplay
-				departures={stop3448Departures}
-				title='Departures towards Raxstraße, Rudolfshügelgasse'
-				platform='Platform 1'
-				towards='Raxstraße, Rudolfshügelgasse'
-			/>
-			<DepartureDisplay
-				departures={stop3445Departures}
-				title='Departures towards Bruno-Marek-Allee'
-				platform='Platform 2'
-				towards='Bruno-Marek-Allee'
-			/>
+		<div className='flex justify-between space-x-8 p-6'>
+			<div className='w-1/2'>
+				<DepartureDisplay
+					departures={stop3448Departures}
+					title='Abfahrt'
+					platform={`Platform: ${stop3445Departures[0]?.vehicle.platform || 'Unknown'}`}
+					towards={stop3445Departures[0]?.vehicle.towards || 'Unknown'}
+				/>
+			</div>
+			<div className='w-1/2'>
+				<DepartureDisplay
+					departures={stop3445Departures}
+					title='Abfahrt'
+					platform={`Platform: ${stop3448Departures[0]?.vehicle.platform || 'Unknown'}`}
+					towards={stop3448Departures[0]?.vehicle.towards || 'Unknown'}
+				/>
+			</div>
 		</div>
 	);
 };
